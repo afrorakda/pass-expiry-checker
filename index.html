@@ -78,6 +78,12 @@
             -webkit-text-fill-color: var(--main) !important;
             opacity: 1 !important;
         }
+        /* 透かし文字（placeholder）の色を薄く修正 */
+        input[type="text"]::placeholder {
+            color: #ccc;
+            -webkit-text-fill-color: #ccc;
+            opacity: 1;
+        }
         input[type="date"] {
             width: 100%;
             padding: 11px 15px;
@@ -338,6 +344,7 @@
                     JSON.parse(content);
                     localStorage.setItem('fc_pass_expiry', content);
                     loadItems();
+                    alert('Restore successful.');
                 } catch (err) { alert('Invalid file'); }
             };
             reader.readAsText(e.target.files[0]);
