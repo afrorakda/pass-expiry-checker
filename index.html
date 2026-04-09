@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pass-Expiry Checker</title>
+    
+    <link rel="icon" href="image_106.png">
+    <link rel="apple-touch-icon" href="image_106.png">
+
+    <style>
+        :root {
+            --main: #333;
+            --bg: #fff;
+            --accent: #eee;
+            --border: #ccc;
+            --input-bg: #fafafa;
+            --radius: 15px;
+            --text-gray: #666;
+            --safe: #4caf50;
+            --warning: #ff9800;
+            --danger: #e91e63;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+        .subtitle { font-size: 0.9rem; color: var(--text-gray); font-weight: 600; margin-bottom: 30px; }
+
+        /* 入力エリア */
+        .input-card {
+            background: var(--input-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 2px solid var(--accent);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-label { font-size: 0.75rem; font-weight: 800; color: var(--main); margin-bottom: 6px; display: block; text-transform: uppercase; }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--main) !important;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-appearance: none;
+            -webkit-text-fill-color: var(--main) !important;
+            opacity: 1 !important;
+        }
+
+        .add-btn {
+            width: 100%;
+            background: var(--main);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* リストエリア */
+        .list-container {
+            flex-grow: 1;
+            margin-top: 10px;
+        }
+
+        .pass-item {
+            background: #fff;
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+        }
+
+        .info-group { flex-grow: 1; }
+        .site-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; display: block; }
+        .expiry-days { font-size: 0.85rem; font-weight: 700; }
+
+        .status-badge {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .del-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding-left: 15px;
+        }
+
+        /* フッター */
+        .footer-btns { display: flex; gap: 10px; margin-top: 30px; margin-bottom: 20px; }
+        .kofi-btn { flex: 6; background: var(--main); color: #fff; padding: 14px; border-radius: var(--radius); text-decoration: none; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+        .home-btn { flex: 4; background: var(--accent); color: var(--main); border: none; padding: 14px; border-radius: var(--radius); font-weight: 800; font-size: 13px; cursor: pointer; }
+
+        footer { font-size: 11px; color: #aaa; line-height: 1.8; font-weight: 500; }
+        footer a { color: inherit; text-decoration: underline; }
+
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: #fff; width: 85%; max-width: 340px; padding: 30px; border-radius: var(--radius); text-align: left; position: relative; }
+        .close-x { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #888; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Pass-Expiry</h1>
+        <p class="subtitle">Check the "freshness" of your passwords.</p>
+    </header>
+
+    <div class="input-card">
+        <div class="input-group">
+            <span class="input-label">Website / Service</span>
+            <input type="text" id="siteInput" placeholder="e.g. Amazon, Google">
+        </div>
+        <div class="input-group">
+            <span class="input-label">Date Changed</span>
+            <input type="date" id="dateInput">
+        </div>
+        <button class="add-btn" onclick="addItem()">Track Freshness</button>
+    </div>
+
+    <div class="list-container" id="listContainer">
+        </div>
+
+    <div class="footer-btns">
+        <a href="https://ko-fi.com/afrorakda" target="_blank" class="kofi-btn">☕️buy me a coffee</a>
+        <button class="home-btn" onclick="showModal()">Add Home</button>
+    </div>
+
+    <footer>
+        <div>No login / No tracking / No ads / Browser only</div>
+        <div><a href="https://afrorakda.com/privacy/">Privacy Policy</a> / afrorakda © 2026</div>
+    </footer>
+</div>
+
+<div id="modal" onclick="hideModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-x" onclick="hideModal()">×</span>
+        <h3>📱 Install</h3>
+        <p>Add to your home screen.</p>
+        <p>🍏 <strong>iPhone (Safari):</strong><br>Tap Share, then Add to Home Screen.</p>
+        <p>🤖 <strong>Android (Chrome):</strong><br>Tap Menu (⋮), then Add to Home Screen.</p>
+    </div>
+</div>
+
+<script>
+    const listContainer = document.getElementById('listContainer');
+    const siteInput = document.getElementById('siteInput');
+    const dateInput = document.getElementById('dateInput');
+
+    // 初期化
+    window.onload = () => {
+        // デフォルトの日付を今日に設定
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+        loadItems();
+    };
+
+    function addItem() {
+        const site = siteInput.value.trim();
+        const date = dateInput.value;
+
+        if (!site || !date) return;
+
+        const items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
+        items.push({ id: Date.now(), site, date });
+        localStorage.setItem('fc_pass_expiry', JSON.stringify(items));
+
+        siteInput.value = '';
+        loadItems();
+    }
+
+    function loadItems() {
+        listContainer.innerHTML = '';
+        const items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
+        const today = new Date();
+
+        // 経過日数順にソート（古いものを上に）
+        items.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        items.forEach(item => {
+            const changedDate = new Date(item.date);
+            const diffTime = Math.abs(today - changedDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            let statusColor = 'var(--safe)';
+            let statusText = 'Healthy';
+
+            if (diffDays >= 730) {
+                statusColor = 'var(--danger)';
+                statusText = 'Critical';
+            } else if (diffDays >= 365) {
+                statusColor = 'var(--warning)';
+                statusText = 'Old';
+            }
+
+            const div = document.createElement('div');
+            div.className = 'pass-item';
+            div.innerHTML = `
+                <div class="status-badge" style="background: ${statusColor}"></div>
+                <div class="info-group">
+                    <span class="site-name">${item.site}</span>
+                    <span class="expiry-days" style="color: ${statusColor}">${diffDays} Days Old (${statusText})</span>
+                </div>
+                <button class="del-btn" onclick="deleteItem(${item.id})">×</button>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    function deleteItem(id) {
+        let items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
+        items = items.filter(item => item.id !== id);
+        localStorage.setItem('fc_pass_expiry', JSON.stringify(items));
+        loadItems();
+    }
+
+    function showModal() { document.getElementById('modal').style.display = 'flex'; }
+    function hideModal() { document.getElementById('modal').style.display = 'none'; }
+</script>
+
+</body>
+</html>
