@@ -82,7 +82,6 @@
 
         input[type="text"] { padding: 12px 40px 12px 15px; }
         input[type="text"]::placeholder { color: var(--placeholder); -webkit-text-fill-color: var(--placeholder); }
-
         input[type="date"] { padding: 12px 15px; min-height: 50px; }
 
         .clr-btn {
@@ -115,6 +114,25 @@
             font-weight: 800;
             cursor: pointer;
             margin-top: 5px;
+        }
+
+        /* Backup/Restore Area */
+        .backup-restore {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 0 5px;
+        }
+        .br-btn {
+            flex: 1;
+            background: none;
+            border: 2px solid var(--accent);
+            color: var(--text-gray);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
         }
 
         .list-container { flex-grow: 1; margin-top: 5px; }
@@ -172,6 +190,11 @@
             <input type="date" id="dateInput">
         </div>
         <button class="add-btn" onclick="addItem()">Track Freshness</button>
+    </div>
+
+    <div class="backup-restore">
+        <button class="br-btn" onclick="backupData()">↓ Backup (Save File)</button>
+        <button class="br-btn" onclick="restoreData()">↑ Restore (Open File)</button>
     </div>
 
     <div class="list-container" id="listContainer"></div>
@@ -274,6 +297,48 @@
         items = items.filter(item => item.id !== id);
         localStorage.setItem('fc_pass_expiry', JSON.stringify(items));
         loadItems();
+    }
+
+    // Backup Function
+    function backupData() {
+        const items = localStorage.getItem('fc_pass_expiry');
+        if (!items || items === '[]') {
+            alert('No data to backup.');
+            return;
+        }
+        const blob = new Blob([items], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const timestamp = new Date().toISOString().split('T')[0];
+        a.href = url;
+        a.download = `pass_expiry_backup_${timestamp}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Restore Function
+    function restoreData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = readerEvent => {
+                try {
+                    const content = readerEvent.target.result;
+                    JSON.parse(content); // Validate JSON
+                    localStorage.setItem('fc_pass_expiry', content);
+                    loadItems();
+                    alert('Data restored successfully.');
+                } catch (err) {
+                    alert('Invalid file format.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 
     function showModal() { document.getElementById('modal').style.display = 'flex'; }
