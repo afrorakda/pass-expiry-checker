@@ -156,22 +156,22 @@
 <div class="container">
     <header>
         <h1>Pass-Expiry</h1>
-        <p class="subtitle">Stay ahead of due dates.</p>
+        <p class="subtitle">Check the "freshness" of your passwords.</p>
     </header>
 
     <div class="input-card">
         <div class="input-group">
             <span class="input-label">Website / Service</span>
             <div class="input-wrapper">
-                <input type="text" id="siteInput" placeholder="e.g. Netflix, Rent, Password" oninput="updateUI()">
+                <input type="text" id="siteInput" placeholder="e.g. Amazon, Google" oninput="updateUI()">
                 <button class="clr-btn" id="clrBtn" onclick="clearText()">×</button>
             </div>
         </div>
         <div class="input-group">
-            <span class="input-label">Due Date</span>
+            <span class="input-label">Date Changed</span>
             <input type="date" id="dateInput">
         </div>
-        <button class="add-btn" onclick="addItem()">Track Due Date</button>
+        <button class="add-btn" onclick="addItem()">Track Freshness</button>
     </div>
 
     <div class="list-container" id="listContainer"></div>
@@ -226,39 +226,42 @@
     function loadItems() {
         listContainer.innerHTML = '';
         const items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-        // 期限が近い順に並び替え
         items.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         items.forEach(item => {
-            const targetDate = new Date(item.date);
-            const targetTime = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
+            const changedDate = new Date(item.date);
+            changedDate.setHours(0, 0, 0, 0);
             
-            const diffTime = targetTime - today;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffTime = Math.max(0, today - changedDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             
             let statusColor = 'var(--safe)';
-            let statusText = `${diffDays} Days Left`;
+            let statusText = 'Healthy';
+            let useBorder = false;
 
-            if (diffDays < 0) {
-                statusColor = 'var(--warning)';
-                statusText = `Past! (${Math.abs(diffDays)}d ago)`;
-            } else if (diffDays === 0) {
-                statusColor = 'var(--danger)';
-                statusText = 'Due Today!';
-            } else if (diffDays <= 7) {
-                statusColor = 'var(--danger)';
+            if (diffDays >= 730) { 
+                statusColor = 'var(--danger)'; 
+                statusText = 'Critical'; 
+                useBorder = true;
+            } else if (diffDays >= 365) { 
+                statusColor = 'var(--warning)'; 
+                statusText = 'Old'; 
+                useBorder = true;
             }
+
+            const borderColor = useBorder ? statusColor : 'var(--accent)';
 
             const div = document.createElement('div');
             div.className = 'pass-item';
+            div.style.borderColor = borderColor;
             div.innerHTML = `
                 <div class="status-badge" style="background: ${statusColor}"></div>
                 <div class="info-group">
                     <span class="site-name">${item.site}</span>
-                    <span class="expiry-days" style="color: ${statusColor}">${statusText}</span>
+                    <span class="expiry-days" style="color: ${statusColor}">${diffDays} Days Old (${statusText})</span>
                 </div>
                 <button class="del-btn" onclick="deleteItem(${item.id})">×</button>
             `;
