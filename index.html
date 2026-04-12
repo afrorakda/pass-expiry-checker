@@ -20,6 +20,7 @@
             --safe: #4caf50;
             --warning: #ff9800;
             --danger: #e91e63;
+            --placeholder: #bbb;
         }
 
         body {
@@ -58,10 +59,10 @@
             box-sizing: border-box;
         }
 
-        .input-group { position: relative; margin-bottom: 15px; width: 100%; box-sizing: border-box; }
+        .input-group { position: relative; margin-bottom: 15px; width: 100%; }
         .input-label { font-size: 0.75rem; font-weight: 800; color: var(--main); margin-bottom: 6px; display: block; text-transform: uppercase; }
         
-        .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; box-sizing: border-box; }
+        .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
 
         input[type="text"], input[type="date"] {
             width: 100%;
@@ -74,26 +75,15 @@
             color: var(--main) !important;
             box-sizing: border-box;
             outline: none;
-            -webkit-appearance: none; /* iOS標準スタイル解除 */
+            -webkit-appearance: none;
             -webkit-text-fill-color: var(--main) !important;
             opacity: 1 !important;
         }
 
-        input[type="text"] {
-            padding: 12px 40px 12px 15px;
-        }
+        input[type="text"] { padding: 12px 40px 12px 15px; }
+        input[type="text"]::placeholder { color: var(--placeholder); -webkit-text-fill-color: var(--placeholder); }
 
-        input[type="text"]::placeholder {
-            color: #ccc;
-            -webkit-text-fill-color: #ccc;
-        }
-
-        /* 日付入力欄の崩れ防止 */
-        input[type="date"] {
-            padding: 12px 15px;
-            min-height: 50px; /* 高さをしっかり確保 */
-            line-height: 1.2;
-        }
+        input[type="date"] { padding: 12px 15px; min-height: 50px; }
 
         .clr-btn {
             position: absolute;
@@ -125,32 +115,9 @@
             font-weight: 800;
             cursor: pointer;
             margin-top: 5px;
-            transition: opacity 0.1s;
-        }
-        .add-btn:active { opacity: 0.8; }
-
-        .backup-restore {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 0 5px;
-        }
-        .br-btn {
-            flex: 1;
-            background: none;
-            border: 2px solid var(--accent);
-            color: var(--text-gray);
-            padding: 8px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
         }
 
-        .list-container {
-            flex-grow: 1;
-            margin-top: 5px;
-        }
+        .list-container { flex-grow: 1; margin-top: 5px; }
 
         .pass-item {
             background: #fff;
@@ -169,23 +136,8 @@
         .site-name { font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; display: block; }
         .expiry-days { font-size: 0.85rem; font-weight: 700; }
 
-        .status-badge {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .del-btn {
-            background: none;
-            border: none;
-            color: #ccc;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0 0 0 15px;
-            font-weight: 800;
-        }
+        .status-badge { width: 12px; height: 12px; border-radius: 50%; margin-right: 15px; flex-shrink: 0; }
+        .del-btn { background: none; border: none; color: #ccc; font-size: 1.5rem; cursor: pointer; padding: 0 0 0 15px; font-weight: 800; }
 
         .footer-btns { display: flex; gap: 10px; margin-top: 30px; margin-bottom: 20px; }
         .kofi-btn { flex: 6; background: var(--main); color: #fff; padding: 14px; border-radius: var(--radius); text-decoration: none; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: center; }
@@ -194,7 +146,7 @@
         footer { font-size: 11px; color: #aaa; line-height: 1.8; font-weight: 500; }
         footer a { color: inherit; text-decoration: underline; }
 
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; touch-action: none; }
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; }
         .modal-content { background: #fff; width: 85%; max-width: 340px; padding: 30px; border-radius: var(--radius); text-align: left; position: relative; }
         .close-x { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #888; cursor: pointer; }
     </style>
@@ -204,27 +156,22 @@
 <div class="container">
     <header>
         <h1>Pass-Expiry</h1>
-        <p class="subtitle">Check the "freshness" of your passwords.</p>
+        <p class="subtitle">Stay ahead of due dates.</p>
     </header>
 
     <div class="input-card">
         <div class="input-group">
             <span class="input-label">Website / Service</span>
             <div class="input-wrapper">
-                <input type="text" id="siteInput" placeholder="e.g. Amazon, Google" oninput="updateUI()">
+                <input type="text" id="siteInput" placeholder="e.g. Netflix, Rent, Password" oninput="updateUI()">
                 <button class="clr-btn" id="clrBtn" onclick="clearText()">×</button>
             </div>
         </div>
         <div class="input-group">
-            <span class="input-label">Date Changed</span>
+            <span class="input-label">Due Date</span>
             <input type="date" id="dateInput">
         </div>
-        <button class="add-btn" onclick="addItem()">Track Freshness</button>
-    </div>
-
-    <div class="backup-restore">
-        <button class="br-btn" onclick="backupData()">↓ Backup (Save File)</button>
-        <button class="br-btn" onclick="restoreData()">↑ Restore (Open File)</button>
+        <button class="add-btn" onclick="addItem()">Track Due Date</button>
     </div>
 
     <div class="list-container" id="listContainer"></div>
@@ -235,8 +182,7 @@
     </div>
 
     <footer>
-        <div>No login / No tracking / No ads / Browser only</div>
-        <div><a href="https://afrorakda.com/privacy/">Privacy Policy</a> / afrorakda © 2026</div>
+        <div>No login / No tracking / No ads / Browser only Privacy Policy / afrorakda © 2026</div>
     </footer>
 </div>
 
@@ -262,25 +208,16 @@
         loadItems();
     };
 
-    function updateUI() {
-        clrBtn.classList.toggle('active', siteInput.value !== '');
-    }
-
-    function clearText() {
-        siteInput.value = '';
-        updateUI();
-        siteInput.focus();
-    }
+    function updateUI() { clrBtn.classList.toggle('active', siteInput.value !== ''); }
+    function clearText() { siteInput.value = ''; updateUI(); siteInput.focus(); }
 
     function addItem() {
         const site = siteInput.value.trim();
         const date = dateInput.value;
         if (!site || !date) return;
-
         const items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
         items.push({ id: Date.now(), site, date });
         localStorage.setItem('fc_pass_expiry', JSON.stringify(items));
-
         siteInput.value = '';
         updateUI();
         loadItems();
@@ -289,20 +226,31 @@
     function loadItems() {
         listContainer.innerHTML = '';
         const items = JSON.parse(localStorage.getItem('fc_pass_expiry') || '[]');
-        const today = new Date();
-        
-        // 日付順にソート（古いものが上）
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+        // 期限が近い順に並び替え
         items.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         items.forEach(item => {
-            const changedDate = new Date(item.date);
-            const diffTime = today - changedDate;
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const targetDate = new Date(item.date);
+            const targetTime = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()).getTime();
+            
+            const diffTime = targetTime - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
             let statusColor = 'var(--safe)';
-            let statusText = 'Healthy';
-            if (diffDays >= 365) { statusColor = 'var(--danger)'; statusText = 'Critical'; }
-            else if (diffDays >= 180) { statusColor = 'var(--warning)'; statusText = 'Old'; }
+            let statusText = `${diffDays} Days Left`;
+
+            if (diffDays < 0) {
+                statusColor = 'var(--warning)';
+                statusText = `Past! (${Math.abs(diffDays)}d ago)`;
+            } else if (diffDays === 0) {
+                statusColor = 'var(--danger)';
+                statusText = 'Due Today!';
+            } else if (diffDays <= 7) {
+                statusColor = 'var(--danger)';
+            }
 
             const div = document.createElement('div');
             div.className = 'pass-item';
@@ -310,7 +258,7 @@
                 <div class="status-badge" style="background: ${statusColor}"></div>
                 <div class="info-group">
                     <span class="site-name">${item.site}</span>
-                    <span class="expiry-days" style="color: ${statusColor}">${diffDays} Days Old (${statusText})</span>
+                    <span class="expiry-days" style="color: ${statusColor}">${statusText}</span>
                 </div>
                 <button class="del-btn" onclick="deleteItem(${item.id})">×</button>
             `;
@@ -323,37 +271,6 @@
         items = items.filter(item => item.id !== id);
         localStorage.setItem('fc_pass_expiry', JSON.stringify(items));
         loadItems();
-    }
-
-    function backupData() {
-        const items = localStorage.getItem('fc_pass_expiry');
-        if (!items || items === '[]') return;
-        const blob = new Blob([items], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `pass_expiry_backup_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function restoreData() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.json';
-        input.onchange = e => {
-            const reader = new FileReader();
-            reader.onload = readerEvent => {
-                try {
-                    const content = readerEvent.target.result;
-                    JSON.parse(content);
-                    localStorage.setItem('fc_pass_expiry', content);
-                    loadItems();
-                } catch (err) { alert('Invalid file'); }
-            };
-            reader.readAsText(e.target.files[0]);
-        };
-        input.click();
     }
 
     function showModal() { document.getElementById('modal').style.display = 'flex'; }
